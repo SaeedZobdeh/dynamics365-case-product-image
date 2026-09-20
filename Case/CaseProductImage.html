@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: Segoe UI, Arial, sans-serif;
+            text-align: center;
+        }
+
+        #productImage {
+            display: none;
+            max-width: 500px;
+            max-height: 500px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        #noImageMessage {
+            display: none;
+            padding: 20px;
+            color: #666666;
+            font-size: 14px;
+        }
+    </style>
+
+    <script>
+        var PRODUCT_LOOKUP = "productid";
+        var PRODUCT_ENTITY = "product";
+
+        // Loads the selected Product image.
+        async function loadProductImage() {
+            var productImage =
+                document.getElementById("productImage");
+
+            var noImageMessage =
+                document.getElementById("noImageMessage");
+
+            productImage.style.display = "none";
+            noImageMessage.style.display = "none";
+
+            try {
+                var productAttribute =
+                    window.parent.Xrm.Page.getAttribute(PRODUCT_LOOKUP);
+
+                if (!productAttribute) {
+                    showNoImageMessage();
+                    return;
+                }
+
+                var productValue =
+                    productAttribute.getValue();
+
+                if (!productValue || productValue.length === 0) {
+                    showNoImageMessage();
+                    return;
+                }
+
+                var productId =
+                    productValue[0].id
+                        .replace("{", "")
+                        .replace("}", "");
+
+                var result =
+                    await window.parent.Xrm.WebApi.retrieveRecord(
+                        PRODUCT_ENTITY,
+                        productId,
+                        "?$select=entityimage_url"
+                    );
+
+                if (!result.entityimage_url) {
+                    showNoImageMessage();
+                    return;
+                }
+
+                var imageUrl =
+                    result.entityimage_url;
+
+                if (imageUrl.indexOf("http") !== 0) {
+                    imageUrl =
+                        window.parent.Xrm.Page.context.getClientUrl() +
+                        imageUrl;
+                }
+
+                productImage.src = imageUrl;
+                productImage.style.display = "inline-block";
+            }
+            catch (error) {
+                console.error(
+                    "Error loading Product image:",
+                    error
+                );
+
+                showNoImageMessage();
+            }
+        }
+
+        // Displays the fallback message when the Product has no image.
+        function showNoImageMessage() {
+            document.getElementById(
+                "noImageMessage"
+            ).style.display = "block";
+        }
+
+        // Loads the Product image when the Web Resource is ready.
+        window.onload = function () {
+            loadProductImage();
+        };
+    </script>
+</head>
+
+<body>
+    <img
+        id="productImage"
+        alt="Product Image"
+    />
+
+    <div id="noImageMessage">
+        No Product image available.
+    </div>
+</body>
+</html>
