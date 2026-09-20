@@ -17,6 +17,12 @@ The Product image is updated immediately when the Product lookup changes, withou
 - Uses separate HTML and JavaScript Web Resources
 - Designed for legacy Dynamics 365 environments
 
+## Preview
+
+The Product image is displayed directly on the Case form and is refreshed automatically when the Product lookup changes.
+
+![Case Product Image Preview](docs/case-product-image-preview.png)
+
 ## Project Structure
 
 ```text
